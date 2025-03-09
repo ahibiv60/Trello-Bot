@@ -14,9 +14,9 @@ def check_author(author, card_name, card_url, list):
         USER_ID = USER_IDS.get(author)
 
         if USER_ID:
-            return f"<@{USER_ID}> **your card approved**\n{card_name}\n🔗 [Card link]({card_url})"
+            return f"<@{USER_ID}> your [card]({card_url}) approved"
         else:
-            return f"{author} **your card approved**\n{card_name}\n🔗 [Card link]({card_url})"
+            return f"{author} your [card]({card_url}) approved"
 
 def send_to_discord(author, card_name, card_url, list):
     message = check_author(author, card_name, card_url, list)
