@@ -23,8 +23,9 @@ def process_cards_in_ready_list():
 
     if removed_cards:
         sent_cards_in_ready_list -= removed_cards
-
-    log_to_console("📌", f"Currently stored cards in ready collection: {sent_cards_in_ready_list}")
+        
+    if ENVIRONMENT == "test":
+        log_to_console("📌", f"Currently stored cards in ready collection: {sent_cards_in_ready_list}")
 
 def process_cards_in_approved_list():
     global sent_cards_in_approved_list
@@ -41,13 +42,14 @@ def process_cards_in_approved_list():
     if removed_cards:
         sent_cards_in_approved_list -= removed_cards
 
-    log_to_console("📌", f"Currently stored cards in approved collection: {sent_cards_in_approved_list}")
+    if ENVIRONMENT == "test":
+        log_to_console("📌", f"Currently stored cards in approved collection: {sent_cards_in_approved_list}")
 
 def main():
     log_to_console("🚀", "App started, checking Trello every 20 seconds...")
     print(f"Environment: {ENVIRONMENT}")
     
-    if not all([TRELLO_KEY, TRELLO_TOKEN, READY_LIST_ID, DISCORD_WEBHOOK_URL]):
+    if not all([TRELLO_KEY, TRELLO_TOKEN, READY_LIST_ID, APPROVED_LIST_ID, DISCORD_WEBHOOK_URL]):
         raise ValueError("❌ Not all data loaded, check .env file")
     
     try:
