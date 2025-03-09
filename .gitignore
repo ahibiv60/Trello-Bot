@@ -1,0 +1,16 @@
+.venv/
+venv/
+
+config.env
+users.json
+
+__pycache__/
+*.pyc
+*.pyo
+
+logs/
+log.txt
+
+.vscode/
+.idea/
+*.iml
