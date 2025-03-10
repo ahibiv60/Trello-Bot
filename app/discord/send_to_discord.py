@@ -6,21 +6,48 @@ from app.utils.users_loader import load_user_ids
 
 USER_IDS = load_user_ids()
 
-def check_author(author, card_name, card_url, list):
+def process_message(author, card_name, card_url, list):
     if list == "ready":
-            message = f"{author} added new card in Trello:\n**{card_name}**\n🔗 [Card link]({card_url})"
-            return message
+        embed = {
+            "title": ":pencil: Created new card in Trello",
+            "description": f"Author: {author}\n{card_name}",
+            "color": 3447003,  # Blue color
+            "fields": [
+                {
+                    "name": "🔗 Link on the card",
+                    "value": f"[View]({card_url})",
+                    "inline": False
+                }
+            ]
+        }
+        return {
+            "embeds": [embed]
+        }
+
     elif list == "approved":
         USER_ID = USER_IDS.get(author)
+        mention = f"<@{USER_ID}>" if USER_ID else author
 
-        if USER_ID:
-            return f"<@{USER_ID}> your [card]({card_url}) approved"
-        else:
-            return f"{author} your [card]({card_url}) approved"
+        embed = {
+            "title": "✅ Card approved!",
+            "description": f"{card_name}",
+            "color": 65280,  # Green color
+            "fields": [
+                {
+                    "name": "🔗 Link on the card",
+                    "value": f"[View]({card_url})",
+                    "inline": False
+                }
+            ]
+        }
+
+        return {
+            "content": mention,
+            "embeds": [embed]
+        }
 
 def send_to_discord(author, card_name, card_url, list):
-    message = check_author(author, card_name, card_url, list)
-    data = {"content": message}
+    data = process_message(author, card_name, card_url, list)
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
