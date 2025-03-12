@@ -53,7 +53,7 @@ def send_to_discord(author, card_name, card_url, list):
         try:
             response = requests.post(DISCORD_WEBHOOK_URL, json=data, timeout=10)
             if response.status_code in [200, 204]:
-                log_to_file(f"Card {card_url} successfully sent to Discord")
+                log_to_file(f"[{list} list] Card {card_url} successfully sent to Discord")
                 return
             elif response.status_code == 429:
                 retry_after = int(response.headers.get("Retry-After", 30))
