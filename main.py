@@ -25,7 +25,7 @@ def process_cards_in_ready_list():
         sent_cards_in_ready_list -= removed_cards
         
     if ENVIRONMENT == "test":
-        log_to_console("📌", f"Currently stored cards in ready collection: {sent_cards_in_ready_list}")
+        log_to_console(f"📦 Currently stored cards in ready collection: {sent_cards_in_ready_list}")
 
 def process_cards_in_approved_list():
     global sent_cards_in_approved_list
@@ -43,10 +43,10 @@ def process_cards_in_approved_list():
         sent_cards_in_approved_list -= removed_cards
 
     if ENVIRONMENT == "test":
-        log_to_console("📌", f"Currently stored cards in approved collection: {sent_cards_in_approved_list}")
+        log_to_console(f"📦 Currently stored cards in approved collection: {sent_cards_in_approved_list}")
 
 def main():
-    log_to_console("🚀", "App started, checking Trello every 20 seconds...")
+    log_to_console("🚀 App started, checking Trello every 20 seconds...")
     print(f"Environment: {ENVIRONMENT}")
     
     if not all([TRELLO_KEY, TRELLO_TOKEN, READY_LIST_ID, APPROVED_LIST_ID, DISCORD_WEBHOOK_URL]):
@@ -60,7 +60,7 @@ def main():
             process_cards_in_ready_list()
             time.sleep(requests_frequency)
     except KeyboardInterrupt:
-        log_to_console("🛑", "App stopped")
+        log_to_console("🛑 App stopped")
 
 if __name__ == "__main__":
     main()
