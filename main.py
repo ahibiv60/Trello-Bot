@@ -49,7 +49,7 @@ def main():
     log_to_console("🚀 App started, checking Trello every 20 seconds...")
     print(f"Environment: {ENVIRONMENT}")
     
-    if not all([TRELLO_KEY, TRELLO_TOKEN, READY_LIST_ID, APPROVED_LIST_ID, DISCORD_WEBHOOK_URL]):
+    if not all([ENVIRONMENT, TRELLO_KEY, TRELLO_TOKEN, READY_LIST_ID, APPROVED_LIST_ID, DISCORD_WEBHOOK_URL]):
         raise ValueError("❌ Not all data loaded, check .env file")
     
     try:
