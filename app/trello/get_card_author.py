@@ -5,7 +5,7 @@ from app.config.config import TRELLO_KEY, TRELLO_TOKEN, MAX_ATTEMPTS
 
 def get_card_author(card_id):
     url = f"https://api.trello.com/1/cards/{card_id}/actions"
-    params = {'filter': 'createCard', 'key': TRELLO_KEY, 'token': TRELLO_TOKEN}
+    params = {'filter': 'copyCard,createCard', 'key': TRELLO_KEY, 'token': TRELLO_TOKEN}
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
