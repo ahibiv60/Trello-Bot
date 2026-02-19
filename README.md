@@ -1,11 +1,15 @@
 ﻿# Trello Bot
 
-Trello Bot sends notifications to Discord when cards appear in selected Trello lists.
+Trello Bot monitors selected Trello lists and sends notifications to Discord.
 
 ## Features
 - Polls Trello lists via API.
 - Sends messages to Discord via webhook.
+- Resolves message author with fallback logic:
+  - first assigned member on the card;
+  - if no members are assigned, card creator.
 - Mentions mapped users for `approved` events.
+- Uses cooldowns to avoid aggressive retries when Trello or Discord is unstable.
 
 ## Requirements
 - Python 3.13.x (recommended)
@@ -43,6 +47,16 @@ This file maps Trello full names to Discord user IDs:
 ```
 
 If the file is missing or invalid, bot still works, but sends messages without mentions.
+
+## Runtime Behavior
+- Entry point: `main.py` -> `app/bot/service.py`.
+- Processing order in each cycle: `ready` list, then `approved` list.
+- Poll interval:
+  - `main`: every 20 seconds, scheduler enabled;
+  - `test`: every 5 seconds, scheduler disabled.
+- Cooldowns:
+  - Trello cooldown: 600 seconds;
+  - Discord cooldown: 600 seconds.
 
 ## Run
 
