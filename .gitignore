@@ -2,7 +2,7 @@
 venv/
 
 config.env
-users.json
+app/resources/users.json
 
 __pycache__/
 *.pyc

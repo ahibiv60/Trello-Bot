@@ -1,60 +1,51 @@
-# Trello Bot
-Trello Bot is a bot that sends notifications to Discord about cards added to Trello. It automates the process of monitoring new cards and tagging relevant users.
+﻿# Trello Bot
+
+Trello Bot sends notifications to Discord when cards appear in selected Trello lists.
 
 ## Features
-- Checks cards in Trello via API.
+- Polls Trello lists via API.
 - Sends messages to Discord via webhook.
-- Tags specific users for certain events (e.g., Approved messages).
+- Mentions mapped users for `approved` events.
 
 ## Requirements
-Before running the project, make sure you have installed:
-- **Python 3.13.2** (recommended)
-- **pip** (Python package manager)
+- Python 3.13.x (recommended)
+- pip
 
 ## Installation
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/username/Trello-Bot.git
-   ```
-2. **Navigate to the project folder:**
-   ```bash
-   cd Trello-Bot
-   ```
-3. **Install the required libraries:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+1. Clone repository.
+2. Open project folder.
+3. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Configuration
-Before running the bot for the first time, configure the necessary files.
 
-### Configuring `config.env`
-The `config.env` file contains the project's main settings. Before using it remove `_example` from the filename:
+### 1) `config.env`
+Create `config.env` from `config_example.env` and fill values:
+- `ENVIRONMENT` must be `main` or `test`.
+- `TRELLO_KEY`
+- `TRELLO_TOKEN`
+- `READY_LIST_ID`
+- `APPROVED_LIST_ID`
+- `DISCORD_WEBHOOK_URL_MAIN`
+- `DISCORD_WEBHOOK_URL_TEST`
 
-**In `config.env`, specify:**
-- `ENVIRONMENT` – should be "main".
-- `TRELLO_KEY` – API key for Trello access.
-- `TRELLO_TOKEN` – Trello account token.
-- `READY_LIST_ID` – ID of the Ready to be checked issues list in Trello.
-- `APPROVED_LIST_ID` – ID of the Approved issues list in Trello.
-- `DISCORD_WEBHOOK_URL_MAIN` – URL of the Discord webhook created in certain channel.
-- `DISCORD_WEBHOOK_URL_TEST` – should be empty.
+### 2) `app/resources/users.json`
+Create `app/resources/users.json` from `app/resources/users_example.json`.
+This file maps Trello full names to Discord user IDs:
 
-### Configuring `resources/users.json`
-The `resources/users.json` file contains a list of users who will be tagged when sending an `Approved` message.
-Before using it remove `_example` from the filename:
-
-Specify users in `users.json` in the following format:
 ```json
 {
-    "Trello Name": 141382000521798975
+  "Trello Name": 141382000521798975
 }
 ```
 
-## Running the Bot
-After installing all dependencies and configuring the files, run the bot with:
+If the file is missing or invalid, bot still works, but sends messages without mentions.
+
+## Run
 
 ```bash
 py main.py
 ```
-

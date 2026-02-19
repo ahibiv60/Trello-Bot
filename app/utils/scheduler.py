@@ -16,7 +16,10 @@ def wait_until_working_hours():
     if is_working_hours():
         return
 
-    log_to_file("Non-working time now. Calculating the time until work starts...")
+    log_to_file(
+        "Outside working hours. Calculating next run window.",
+        component="scheduler",
+    )
 
     if now.weekday() < 5 and now.hour < 9:
         next_working_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
@@ -26,5 +29,9 @@ def wait_until_working_hours():
 
     seconds_to_wait = (next_working_time - now).total_seconds()
     
-    log_to_file(f"Waiting for {next_working_time.strftime('%Y-%m-%d %H:%M:%S')} ({int(seconds_to_wait)} seconds)...")
+    log_to_file(
+        f"Sleeping until {next_working_time.strftime('%Y-%m-%d %H:%M:%S')} "
+        f"(wait={int(seconds_to_wait)}s).",
+        component="scheduler",
+    )
     time.sleep(seconds_to_wait)

@@ -13,14 +13,33 @@ def get_cards_in_list(list_id):
             if response.status_code == 200:
                 return {card['id']: {'name': card['name'], 'url': card['shortUrl']} for card in response.json()}
             elif response.status_code == 429:
-                log_to_file(f"Trello API limit exceeded. Waiting 30 seconds... (Try {attempt}/{MAX_ATTEMPTS})")
+                log_to_file(
+                    f"Rate limit hit for list_id={list_id}. Retry in 30s "
+                    f"(attempt {attempt}/{MAX_ATTEMPTS}).",
+                    level="WARN",
+                    component="trello.cards",
+                )
                 time.sleep(30)
             else:
-                log_to_file(f"Error retrieving Trello cards ({response.status_code}): {response.text}")
-                return {}
+                log_to_file(
+                    f"Request failed for list_id={list_id}. "
+                    f"status={response.status_code}, body={response.text}",
+                    level="ERROR",
+                    component="trello.cards",
+                )
+                return None
         except requests.exceptions.RequestException as e:
-            log_to_file(f"Network problem: {e}. Waiting 10 minutes... (Try {attempt}/{MAX_ATTEMPTS})")
+            log_to_file(
+                f"Network error for list_id={list_id}: {e}. Retry in 600s "
+                f"(attempt {attempt}/{MAX_ATTEMPTS}).",
+                level="WARN",
+                component="trello.cards",
+            )
             time.sleep(600)
 
-    log_to_file("Failed to retrieve data after 5 attempts")
-    return {}
+    log_to_file(
+        f"Failed to fetch cards for list_id={list_id} after {MAX_ATTEMPTS} attempts.",
+        level="ERROR",
+        component="trello.cards",
+    )
+    return None

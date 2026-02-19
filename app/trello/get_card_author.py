@@ -14,15 +14,40 @@ def get_card_author(card_id):
                 actions = response.json()
                 if actions and 'memberCreator' in actions[0]:
                     return actions[0]['memberCreator'].get('fullName', "Unknown")
+                log_to_file(
+                    f"No creator action found for card_id={card_id}. Using 'Unknown'.",
+                    level="WARN",
+                    component="trello.author",
+                )
+                return "Unknown"
             elif response.status_code == 429:
-                log_to_file(f"Trello API limit exceeded while retrieving author. Waiting 30 seconds... (Try {attempt}/{MAX_ATTEMPTS})")
+                log_to_file(
+                    f"Rate limit hit while reading author for card_id={card_id}. Retry in 30s "
+                    f"(attempt {attempt}/{MAX_ATTEMPTS}).",
+                    level="WARN",
+                    component="trello.author",
+                )
                 time.sleep(30)
             else:
-                log_to_file(f"Error retrieving card author ({response.status_code}): {response.text}")
+                log_to_file(
+                    f"Failed to read author for card_id={card_id}. "
+                    f"status={response.status_code}, body={response.text}",
+                    level="ERROR",
+                    component="trello.author",
+                )
                 return "Unknown"
         except requests.exceptions.RequestException as e:
-            log_to_file(f"Network problem: {e}. Waiting 10 minutes... (Try {attempt}/{MAX_ATTEMPTS})")
+            log_to_file(
+                f"Network error while reading author for card_id={card_id}: {e}. Retry in 600s "
+                f"(attempt {attempt}/{MAX_ATTEMPTS}).",
+                level="WARN",
+                component="trello.author",
+            )
             time.sleep(600)
 
-    log_to_file("Failed to retrieve author after 5 attempts")
+    log_to_file(
+        f"Failed to read author for card_id={card_id} after {MAX_ATTEMPTS} attempts.",
+        level="ERROR",
+        component="trello.author",
+    )
     return "Unknown"
