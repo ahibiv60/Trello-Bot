@@ -61,7 +61,7 @@ def send_to_discord(author, card_name, card_url, list):
             response = requests.post(DISCORD_WEBHOOK_URL, json=data, timeout=10)
             if response.status_code in [200, 204]:
                 log_to_file(
-                    f"Sent message for list='{list}', card='{card_name}', author='{author}', card_url={card_url}.",
+                    f"Sent message for list='{list}', author='{author}', card_url={card_url}.",
                     component="discord.send",
                 )
                 return
