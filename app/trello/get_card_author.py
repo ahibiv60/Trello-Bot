@@ -37,13 +37,14 @@ def get_card_author(card_id):
                 )
                 return "Unknown"
         except requests.exceptions.RequestException as e:
+            backoff_seconds = min(30, 2 ** attempt)
             log_to_file(
-                f"Network error while reading author for card_id={card_id}: {e}. Retry in 600s "
+                f"Network error while reading author for card_id={card_id}: {e}. Retry in {backoff_seconds}s "
                 f"(attempt {attempt}/{MAX_ATTEMPTS}).",
                 level="WARN",
                 component="trello.author",
             )
-            time.sleep(600)
+            time.sleep(backoff_seconds)
 
     log_to_file(
         f"Failed to read author for card_id={card_id} after {MAX_ATTEMPTS} attempts.",

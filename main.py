@@ -1,4 +1,6 @@
 ﻿import time
+from datetime import datetime, timedelta
+
 from app.config.config import (
     ENVIRONMENT,
     TRELLO_KEY,
@@ -17,6 +19,40 @@ from app.discord.send_to_discord import send_to_discord
 
 sent_cards_in_ready_list = set()
 sent_cards_in_approved_list = set()
+TRELLO_COOLDOWN_SECONDS = 600
+DISCORD_COOLDOWN_SECONDS = 600
+trello_cooldown_until = None
+discord_cooldown_until = None
+
+
+def is_cooldown_active(cooldown_until):
+    return cooldown_until is not None and datetime.now() < cooldown_until
+
+
+def set_trello_cooldown():
+    global trello_cooldown_until
+    if is_cooldown_active(trello_cooldown_until):
+        return
+
+    trello_cooldown_until = datetime.now() + timedelta(seconds=TRELLO_COOLDOWN_SECONDS)
+    log_to_console(
+        f"Trello cooldown started for {TRELLO_COOLDOWN_SECONDS} seconds.",
+        level="WARN",
+        component="cooldown.trello",
+    )
+
+
+def set_discord_cooldown():
+    global discord_cooldown_until
+    if is_cooldown_active(discord_cooldown_until):
+        return
+
+    discord_cooldown_until = datetime.now() + timedelta(seconds=DISCORD_COOLDOWN_SECONDS)
+    log_to_console(
+        f"Discord cooldown started for {DISCORD_COOLDOWN_SECONDS} seconds.",
+        level="WARN",
+        component="cooldown.discord",
+    )
 
 
 def resolve_card_author(card_id, card_data):
@@ -36,7 +72,8 @@ def process_cards_in_ready_list():
             level="WARN",
             component="trello.ready",
         )
-        return
+        set_trello_cooldown()
+        return False
 
     new_cards = {
         card_id: data
@@ -46,9 +83,19 @@ def process_cards_in_ready_list():
     removed_cards = sent_cards_in_ready_list - set(current_cards.keys())
 
     for card_id, card_data in new_cards.items():
+        if is_cooldown_active(discord_cooldown_until):
+            return True
+
         author = resolve_card_author(card_id, card_data)
-        send_to_discord(author, card_data["name"], card_data["url"], "ready")
-        sent_cards_in_ready_list.add(card_id)
+        send_status = send_to_discord(author, card_data["name"], card_data["url"], "ready")
+
+        if send_status == "sent":
+            sent_cards_in_ready_list.add(card_id)
+        elif send_status == "retryable_failure":
+            set_discord_cooldown()
+            return True
+        else:
+            sent_cards_in_ready_list.add(card_id)
 
     if removed_cards:
         sent_cards_in_ready_list -= removed_cards
@@ -58,6 +105,8 @@ def process_cards_in_ready_list():
             f"Cached ready card ids: {sorted(sent_cards_in_ready_list)}",
             component="state.ready",
         )
+
+    return True
 
 
 def process_cards_in_approved_list():
@@ -70,7 +119,8 @@ def process_cards_in_approved_list():
             level="WARN",
             component="trello.approved",
         )
-        return
+        set_trello_cooldown()
+        return False
 
     new_cards = {
         card_id: data
@@ -80,9 +130,19 @@ def process_cards_in_approved_list():
     removed_cards = sent_cards_in_approved_list - set(current_cards.keys())
 
     for card_id, card_data in new_cards.items():
+        if is_cooldown_active(discord_cooldown_until):
+            return True
+
         author = resolve_card_author(card_id, card_data)
-        send_to_discord(author, card_data["name"], card_data["url"], "approved")
-        sent_cards_in_approved_list.add(card_id)
+        send_status = send_to_discord(author, card_data["name"], card_data["url"], "approved")
+
+        if send_status == "sent":
+            sent_cards_in_approved_list.add(card_id)
+        elif send_status == "retryable_failure":
+            set_discord_cooldown()
+            return True
+        else:
+            sent_cards_in_approved_list.add(card_id)
 
     if removed_cards:
         sent_cards_in_approved_list -= removed_cards
@@ -92,6 +152,8 @@ def process_cards_in_approved_list():
             f"Cached approved card ids: {sorted(sent_cards_in_approved_list)}",
             component="state.approved",
         )
+
+    return True
 
 
 def main():
@@ -117,6 +179,11 @@ def main():
         while True:
             if scheduler:
                 wait_until_working_hours()
+
+            if is_cooldown_active(trello_cooldown_until):
+                time.sleep(requests_frequency)
+                continue
+
             process_cards_in_approved_list()
             process_cards_in_ready_list()
             time.sleep(requests_frequency)

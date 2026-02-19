@@ -47,13 +47,14 @@ def get_cards_in_list(list_id):
                 )
                 return None
         except requests.exceptions.RequestException as e:
+            backoff_seconds = min(30, 2 ** attempt)
             log_to_file(
-                f"Network error for list_id={list_id}: {e}. Retry in 600s "
+                f"Network error for list_id={list_id}: {e}. Retry in {backoff_seconds}s "
                 f"(attempt {attempt}/{MAX_ATTEMPTS}).",
                 level="WARN",
                 component="trello.cards",
             )
-            time.sleep(600)
+            time.sleep(backoff_seconds)
 
     log_to_file(
         f"Failed to fetch cards for list_id={list_id} after {MAX_ATTEMPTS} attempts.",
