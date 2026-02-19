@@ -19,6 +19,13 @@ sent_cards_in_ready_list = set()
 sent_cards_in_approved_list = set()
 
 
+def resolve_card_author(card_id, card_data):
+    member_names = card_data.get("member_names", [])
+    if member_names:
+        return member_names[0]
+    return get_card_author(card_id)
+
+
 def process_cards_in_ready_list():
     global sent_cards_in_ready_list
 
@@ -39,7 +46,7 @@ def process_cards_in_ready_list():
     removed_cards = sent_cards_in_ready_list - set(current_cards.keys())
 
     for card_id, card_data in new_cards.items():
-        author = get_card_author(card_id)
+        author = resolve_card_author(card_id, card_data)
         send_to_discord(author, card_data["name"], card_data["url"], "ready")
         sent_cards_in_ready_list.add(card_id)
 
@@ -73,7 +80,7 @@ def process_cards_in_approved_list():
     removed_cards = sent_cards_in_approved_list - set(current_cards.keys())
 
     for card_id, card_data in new_cards.items():
-        author = get_card_author(card_id)
+        author = resolve_card_author(card_id, card_data)
         send_to_discord(author, card_data["name"], card_data["url"], "approved")
         sent_cards_in_approved_list.add(card_id)
 

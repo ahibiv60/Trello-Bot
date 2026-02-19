@@ -5,13 +5,31 @@ from app.config.config import TRELLO_KEY, TRELLO_TOKEN, MAX_ATTEMPTS
 
 def get_cards_in_list(list_id):
     url = f"https://api.trello.com/1/lists/{list_id}/cards"
-    params = {'key': TRELLO_KEY, 'token': TRELLO_TOKEN}
+    params = {
+        "key": TRELLO_KEY,
+        "token": TRELLO_TOKEN,
+        "fields": "name,shortUrl,idMembers",
+        "members": "true",
+        "member_fields": "fullName",
+    }
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
             response = requests.get(url, params=params, timeout=10)
             if response.status_code == 200:
-                return {card['id']: {'name': card['name'], 'url': card['shortUrl']} for card in response.json()}
+                cards = {}
+                for card in response.json():
+                    member_names = [
+                        member.get("fullName")
+                        for member in card.get("members", [])
+                        if member.get("fullName")
+                    ]
+                    cards[card["id"]] = {
+                        "name": card["name"],
+                        "url": card["shortUrl"],
+                        "member_names": member_names,
+                    }
+                return cards
             elif response.status_code == 429:
                 log_to_file(
                     f"Rate limit hit for list_id={list_id}. Retry in 30s "
