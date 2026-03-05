@@ -17,7 +17,7 @@ def process_message(author, card_name, card_url, list_name):
             "color": 3447003,
             "fields": [
                 {
-                    "name": "Link to card",
+                    "name": ":link: Link to card",
                     "value": f"[View]({card_url})",
                     "inline": False,
                 }
@@ -30,12 +30,12 @@ def process_message(author, card_name, card_url, list_name):
         mention = f"<@{user_id}>" if user_id else author
 
         embed = {
-            "title": "Card approved!",
+            "title": ":white_check_mark: Card approved!",
             "description": f"{card_name}",
             "color": 65280,
             "fields": [
                 {
-                    "name": "Link to card",
+                    "name": ":link: Link to card",
                     "value": f"[View]({card_url})",
                     "inline": False,
                 }
